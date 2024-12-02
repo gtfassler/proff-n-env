@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Outil de Conversion</title>
+    <style>
+        /* Style CSS pour rendre l'interface utilisateur conviviale */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        label, select, input, button {
+            display: block;
+            margin: 10px 0;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Outil de Conversion</h1>
+    <label for="type">Choisissez le type de conversion :</label>
+    <select id="type" onchange="updateUnits()">
+        <option value="masse">Masse</option>
+        <option value="distance">Distance</option>
+        <option value="surface">Surface</option>
+        <option value="temperature">Température</option>
+    </select>
+
+    <label for="uniteDe">De :</label>
+    <select id="uniteDe"></select>
+
+    <label for="uniteVers">Vers :</label>
+    <select id="uniteVers"></select>
+
+    <label for="valeur">Valeur :</label>
+    <input type="number" id="valeur" step="any">
+
+    <button onclick="convertir()">Convertir</button>
+
+    <div id="result"></div>
+
+    <script>
+        // JavaScript pour gérer les conversions
+
+        // Dictionnaire des unités disponibles pour chaque type de conversion
+        const units = {
+            masse: ['kg', 'lb', 'g'],
+            distance: ['m', 'ft', 'km'],
+            surface: ['m²', 'ft²', 'km²'],
+            temperature: ['C', 'F', 'K']
+        };
+
+        // Fonction pour mettre à jour les unités disponibles en fonction du type sélectionné
+        function updateUnits() {
+            const type = document.getElementById('type').value;
+            const uniteDe = document.getElementById('uniteDe');
+            const uniteVers = document.getElementById('uniteVers');
+            uniteDe.innerHTML = '';
+            uniteVers.innerHTML = '';
+            units[type].forEach(function(unit) {
+                const optionDe = document.createElement('option');
+                optionDe.value = unit;
+                optionDe.text = unit;
+                uniteDe.add(optionDe);
+
+                const optionVers = document.createElement('option');
+                optionVers.value = unit;
+                optionVers.text = unit;
+                uniteVers.add(optionVers);
+            });
+        }
+
+        // Fonction pour effectuer la conversion en fonction du type et des unités sélectionnées
+        function convertir() {
+            const type = document.getElementById('type').value;
+            const uniteDe = document.getElementById('uniteDe').value;
+            const uniteVers = document.getElementById('uniteVers').value;
+            const valeur = parseFloat(document.getElementById('valeur').value);
+            let resultat;
+
+            if (isNaN(valeur)) {
+                document.getElementById('result').innerHTML = "Veuillez entrer une valeur numérique.";
+                return;
+            }
+
+            if (type === 'masse') {
+                resultat = convertirMasse(valeur, uniteDe, uniteVers);
+            } else if (type === 'distance') {
+                resultat = convertirDistance(valeur, uniteDe, uniteVers);
+            } else if (type === 'surface') {
+                resultat = convertirSurface(valeur, uniteDe, uniteVers);
+            } else if (type === 'temperature') {
+                resultat = convertirTemperature(valeur, uniteDe, uniteVers);
+            }
+
+            document.getElementById('result').innerHTML = `Résultat : ${valeur.toFixed(2)} ${uniteDe} = ${resultat.toFixed(2)} ${uniteVers}`;
+        }
+
+        // Fonctions de conversion pour chaque type
+        function convertirMasse(valeur, uniteDe, uniteVers) {
+            const facteurs = {
+                'kg': 1.0,
+                'lb': 2.20462,
+                'g': 1000.0
+            };
+            // Conversion en kg
+            const valeurKg = valeur / facteurs[uniteDe];
+            // Conversion vers l'unité cible
+            return valeurKg * facteurs[uniteVers];
+        }
+
+        function convertirDistance(valeur, uniteDe, uniteVers) {
+            const facteurs = {
+                'm': 1.0,
+                'ft': 3.28084,
+                'km': 0.001
+            };
+            // Conversion en mètres
+            const valeurM = valeur / facteurs[uniteDe];
+            // Conversion vers l'unité cible
+            return valeurM * facteurs[uniteVers];
+        }
+
+        function convertirSurface(valeur, uniteDe, uniteVers) {
+            const facteurs = {
+                'm²': 1.0,
+            'ft²': 10.7639,
+            'km²': 1e-6
+            };
+            // Conversion en m²
+            const valeurM2 = valeur / facteurs[uniteDe];
+            // Conversion vers l'unité cible
+            return valeurM2 * facteurs[uniteVers];
+        }
+
+        function convertirTemperature(valeur, uniteDe, uniteVers) {
+            let resultat;
+            if (uniteDe === 'C') {
+                if (uniteVers === 'F') {
+                    resultat = valeur * 9 / 5 + 32;
+                } else if (uniteVers === 'K') {
+                    resultat = valeur + 273.15;
+                } else {
+                    resultat = valeur;
+                }
+            } else if (uniteDe === 'F') {
+                if (uniteVers === 'C') {
+                    resultat = (valeur - 32) * 5 / 9;
+                } else if (uniteVers === 'K') {
+                    resultat = (valeur - 32) * 5 / 9 + 273.15;
+                } else {
+                    resultat = valeur;
+                }
+            } else if (uniteDe === 'K') {
+                if (uniteVers === 'C') {
+                    resultat = valeur - 273.15;
+                } else if (uniteVers === 'F') {
+                    resultat = (valeur - 273.15) * 9 / 5 + 32;
+                } else {
+                    resultat = valeur;
+                }
+            }
+            return resultat;
+        }
+
+        // Initialiser les unités au chargement de la page
+        updateUnits();
+    </script>
+</body>
+</html>
