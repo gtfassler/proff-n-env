@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Outil de Conversion</title>
+    <style>
+        /* Style CSS pour rendre l'interface utilisateur conviviale */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        label, select, input, button {
+            display: block;
+            margin: 10px 0;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title">Outil de Conversion</h1>
+    <div class="section">
+        <label for="language">Choisissez la langue :</label>
+        <select id="language" onchange="changeLanguage()">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+        </select>
+    </div>
+
+    <div class="section">
+        <label for="type" id="typeLabel">Choisissez le type de conversion :</label>
+        <select id="type" onchange="updateUnits()">
+            <!-- Les options seront ajoutées dynamiquement -->
+        </select>
+    </div>
+
+    <div class="section">
+        <label for="uniteDe" id="fromLabel">De :</label>
+        <select id="uniteDe">
+            <!-- Les options seront ajoutées dynamiquement -->
+        </select>
+    </div>
+
+    <div class="section">
+        <label for="uniteVers" id="toLabel">Vers :</label>
+        <select id="uniteVers">
+            <!-- Les options seront ajoutées dynamiquement -->
+        </select>
+    </div>
+
+    <div class="section">
+        <label for="valeur" id="valueLabel">Valeur :</label>
+        <input type="number" id="valeur" step="any">
+    </div>
+
+    <button onclick="convertir()" id="convertButton">Convertir</button>
+
+    <div id="result"></div>
+
+    <script>
+        // JavaScript pour gérer les conversions et le changement de langue
+
+        // Dictionnaire des textes pour chaque langue
+        const translations = {
+            fr: {
+                title: "Outil de Conversion",
+                chooseLanguage: "Choisissez la langue :",
+                chooseConversionType: "Choisissez le type de conversion :",
+                from: "De :",
+                to: "Vers :",
+                value: "Valeur :",
+                convert: "Convertir",
+                result: "Résultat :",
+                error: "Veuillez entrer une valeur numérique.",
+                types: {
+                    masse: "Masse",
+                    distance: "Distance",
+                    surface: "Surface",
+                    temperature: "Température",
+                    vitesse: "Vitesse"
+                },
+                units: {
+                    masse: {
+                        kg: "Kilogrammes",
+                        lb: "Livres",
+                        g: "Grammes",
+                        oz: "Onces",
+                        tonne: "Tonnes"
+                    },
+                    distance: {
+                        m: "Mètres",
+                        ft: "Pieds",
+                        km: "Kilomètres",
+                        mi: "Miles",
+                        in: "Pouces"
+                    },
+                    surface: {
+                        'm²': "Mètres carrés",
+                        'ft²': "Pieds carrés",
+                        'km²': "Kilomètres carrés",
+                        acre: "Acres",
+                        hectare: "Hectares"
+                    },
+                    temperature: {
+                        C: "Celsius",
+                        F: "Fahrenheit",
+                        K: "Kelvin",
+                        R: "Rankine",
+                        Ré: "Réaumur"
+                    },
+                    vitesse: {
+                        'km/h': "Kilomètres par heure",
+                        mph: "Miles par heure",
+                        'm/s': "Mètres par seconde",
+                        'ft/s': "Pieds par seconde",
+                        knot: "Nœuds"
+                    }
+                }
+            },
+            en: {
+                title: "Conversion Tool",
+                chooseLanguage: "Choose language:",
+                chooseConversionType: "Choose conversion type:",
+                from: "From:",
+                to: "To:",
+                value: "Value:",
+                convert: "Convert",
+                result: "Result:",
+                error: "Please enter a numeric value.",
+                types: {
+                    masse: "Mass",
+                    distance: "Distance",
+                    surface: "Area",
+                    temperature: "Temperature",
+                    vitesse: "Speed"
+                },
+                units: {
+                    masse: {
+                        kg: "Kilograms",
+                        lb: "Pounds",
+                        g: "Grams",
+                        oz: "Ounces",
+                        tonne: "Tonnes"
+                    },
+                    distance: {
+                        m: "Meters",
+                        ft: "Feet",
+                        km: "Kilometers",
+                        mi: "Miles",
+                        in: "Inches"
+                    },
+                    surface: {
+                        'm²': "Square meters",
+                        'ft²': "Square feet",
+                        'km²': "Square kilometers",
+                        acre: "Acres",
+                        hectare: "Hectares"
+                    },
+                    temperature: {
+                        C: "Celsius",
+                        F: "Fahrenheit",
+                        K: "Kelvin",
+                        R: "Rankine",
+                        Ré: "Réaumur"
+                    },
+                    vitesse: {
+                        'km/h': "Kilometers per hour",
+                        mph: "Miles per hour",
+                        'm/s': "Meters per second",
+                        'ft/s': "Feet per second",
+                        knot: "Knots"
+                    }
+                }
+            },
+            es: {
+                title: "Herramienta de Conversión",
+                chooseLanguage: "Elige idioma:",
+                chooseConversionType: "Elige tipo de conversión:",
+                from: "De:",
+                to: "A:",
+                value: "Valor:",
+                convert: "Convertir",
+                result: "Resultado:",
+                error: "Por favor, introduzca un valor numérico.",
+                types: {
+                    masse: "Masa",
+                    distance: "Distancia",
+                    surface: "Superficie",
+                    temperature: "Temperatura",
+                    vitesse: "Velocidad"
+                },
+                units: {
+                    masse: {
+                        kg: "Kilogramos",
+                        lb: "Libras",
+                        g: "Gramos",
+                        oz: "Onzas",
+                        tonne: "Toneladas"
+                    },
+                    distance: {
+                        m: "Metros",
+                        ft: "Pies",
+                        km: "Kilómetros",
+                        mi: "Millas",
+                        in: "Pulgadas"
+                    },
+                    surface: {
+                        'm²': "Metros cuadrados",
+                        'ft²': "Pies cuadrados",
+                        'km²': "Kilómetros cuadrados",
+                        acre: "Acres",
+                        hectare: "Hectáreas"
+                    },
+                    temperature: {
+                        C: "Celsius",
+                        F: "Fahrenheit",
+                        K: "Kelvin",
+                        R: "Rankine",
+                        Ré: "Réaumur"
+                    },
+                    vitesse: {
+                        'km/h': "Kilómetros por hora",
+                        mph: "Millas por hora",
+                        'm/s': "Metros por segundo",
+                        'ft/s': "Pies por segundo",
+                        knot: "Nudos"
+                    }
+                }
+            }
+        };
+
+        let currentLanguage = 'fr';
+
+        // Dictionnaire des unités avec leurs facteurs de conversion
+        const unitsFactors = {
+            masse: {
+                kg: 1.0,
+                lb: 2.20462,
+                g: 1000.0,
+                oz: 35.274,
+                tonne: 0.001
+            },
+            distance: {
+                m: 1.0,
+                ft: 3.28084,
+                km: 0.001,
+                mi: 0.000621371,
+                in: 39.3701
+            },
+            surface: {
+                'm²': 1.0,
+                'ft²': 10.7639,
+                'km²': 1e-6,
+                acre: 0.000247105,
+                hectare: 0.0001
+            },
+            temperature: null, // Les conversions de température sont traitées séparément
+            vitesse: {
+                'km/h': 1.0,
+                mph: 0.621371,
+                'm/s': 0.277778,
+                'ft/s': 0.911344,
+                knot: 0.539957
+            }
+        };
+
+        // Fonction pour mettre à jour les labels et textes selon la langue
+        function changeLanguage() {
+            currentLanguage = document.getElementById('language').value;
+            const lang = translations[currentLanguage];
+            document.getElementById('title').innerText = lang.title;
+            document.querySelector('label[for="language"]').innerText = lang.chooseLanguage;
+            document.getElementById('typeLabel').innerText = lang.chooseConversionType;
+            document.getElementById('fromLabel').innerText = lang.from;
+            document.getElementById('toLabel').innerText = lang.to;
+            document.getElementById('valueLabel').innerText = lang.value;
+            document.getElementById('convertButton').innerText = lang.convert;
+            updateConversionTypes();
+            updateUnits();
+        }
+
+        // Fonction pour mettre à jour les types de conversion disponibles
+        function updateConversionTypes() {
+            const typeSelect = document.getElementById('type');
+            typeSelect.innerHTML = '';
+            const types = translations[currentLanguage].types;
+            for (const key in types) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.text = types[key];
+                typeSelect.add(option);
+            }
+        }
+
+        // Fonction pour mettre à jour les unités disponibles en fonction du type sélectionné
+        function updateUnits() {
+            const type = document.getElementById('type').value;
+            const uniteDe = document.getElementById('uniteDe');
+            const uniteVers = document.getElementById('uniteVers');
+            uniteDe.innerHTML = '';
+            uniteVers.innerHTML = '';
+            const unitsList = unitsFactors[type];
+            const unitsNames = translations[currentLanguage].units[type];
+            for (const unit in unitsNames) {
+                const optionDe = document.createElement('option');
+                optionDe.value = unit;
+                optionDe.text = unitsNames[unit];
+                uniteDe.add(optionDe);
+
+                const optionVers = document.createElement('option');
+                optionVers.value = unit;
+                optionVers.text = unitsNames[unit];
+                uniteVers.add(optionVers);
+            }
+        }
+
+        // Fonction pour effectuer la conversion en fonction du type et des unités sélectionnées
+        function convertir() {
+            const type = document.getElementById('type').value;
+            const uniteDe = document.getElementById('uniteDe').value;
+            const uniteVers = document.getElementById('uniteVers').value;
+            const valeur = parseFloat(document.getElementById('valeur').value);
+            let resultat;
+
+            if (isNaN(valeur)) {
+                document.getElementById('result').innerHTML = translations[currentLanguage].error;
+                return;
+            }
+
+            if (type === 'masse') {
+                resultat = convertirMasse(valeur, uniteDe, uniteVers);
+            } else if (type === 'distance') {
+                resultat = convertirDistance(valeur, uniteDe, uniteVers);
+            } else if (type === 'surface') {
+                resultat = convertirSurface(valeur, uniteDe, uniteVers);
+            } else if (type === 'temperature') {
+                resultat = convertirTemperature(valeur, uniteDe, uniteVers);
+            } else if (type === 'vitesse') {
+                resultat = convertirVitesse(valeur, uniteDe, uniteVers);
+            }
+
+            // Afficher le résultat avec les noms complets des unités
+            const unitsNames = translations[currentLanguage].units[type];
+            document.getElementById('result').innerHTML = `<p>${translations[currentLanguage].result}</p><p>${valeur.toFixed(2)} ${unitsNames[uniteDe]} = ${resultat.toFixed(2)} ${unitsNames[uniteVers]}</p>`;
+        }
+
+        // Fonctions de conversion pour chaque type
+        function convertirMasse(valeur, uniteDe, uniteVers) {
+            const facteurs = unitsFactors['masse'];
+            // Conversion en kg
+            const valeurKg = valeur / facteurs[uniteDe];
+            // Conversion vers l'unité cible
+            return valeurKg * facteurs[uniteVers];
+        }
+
+        function convertirDistance(valeur, uniteDe, uniteVers) {
+            const facteurs = unitsFactors['distance'];
+            // Conversion en mètres
+            const valeurM = valeur / facteurs[uniteDe];
+            // Conversion vers l'unité cible
+            return valeurM * facteurs[uniteVers];
+        }
+
+        function convertirSurface(valeur, uniteDe, uniteVers) {
+            const facteurs = unitsFactors['surface'];
+            // Conversion en m²
+            const valeurM2 = valeur / facteurs[uniteDe];
+            // Conversion vers l'unité cible
+            return valeurM2 * facteurs[uniteVers];
+        }
+
+        function convertirTemperature(valeur, uniteDe, uniteVers) {
+            let resultat;
+            if (uniteDe === uniteVers) {
+                return valeur;
+            }
+            // Convertir de l'unité de départ à Celsius
+            let valeurC;
+            switch (uniteDe) {
+                case 'C':
+                    valeurC = valeur;
+                    break;
+                case 'F':
+                    valeurC = (valeur - 32) * 5 / 9;
+                    break;
+                case 'K':
+                    valeurC = valeur - 273.15;
+                    break;
+                case 'R':
+                    valeurC = (valeur - 491.67) * 5 / 9;
+                    break;
+                case 'Ré':
+                    valeurC = valeur * 1.25;
+                    break;
+            }
+            // Convertir de Celsius à l'unité cible
+            switch (uniteVers) {
+                case 'C':
+                    resultat = valeurC;
+                    break;
+                case 'F':
+                    resultat = valeurC * 9 / 5 + 32;
+                    break;
+                case 'K':
+                    resultat = valeurC + 273.15;
+                    break;
+                case 'R':
+                    resultat = (valeurC + 273.15) * 9 / 5;
+                    break;
+                case 'Ré':
+                    resultat = valeurC * 0.8;
+                    break;
+            }
+            return resultat;
+        }
+
+        function convertirVitesse(valeur, uniteDe, uniteVers) {
+            const facteurs = unitsFactors['vitesse'];
+            // Conversion en km/h
+            const valeurKmh = valeur / facteurs[uniteDe];
+            // Conversion vers l'unité cible
+            return valeurKmh * facteurs[uniteVers];
+        }
+
+        // Initialiser les unités au chargement de la page
+        changeLanguage();
+    </script>
+</body>
+</html>
+
